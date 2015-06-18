@@ -19,13 +19,22 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ')@9v-+0g)&9cmq&*9biktwtf(nqusc12q0*ray7n*_9xu8vyra'
+DEBUG = os.environ.get('DEBUG', '1') == '1'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if DEBUG:
+    SECRET_KEY = ')@9v-+0g)&9cmq&*9biktwtf(nqusc12q0*ray7n*_9xu8vyra'
+else:
+    with open(os.path.join(BASE_DIR, '..', 'key')) as key_file:
+        SECRET_KEY = key_file.read()
 
-ALLOWED_HOSTS = []
+TEMPLATE_DEBUG = DEBUG
+
+if DEBUG:
+    ALLOWED_HOSTS = []
+else:
+    ALLOWED_HOSTS = ['urls.%s' % socket.gethostname()]
+
+INTERNAL_IPS = ('127.0.0.1',)
 
 
 # Application definition
@@ -76,11 +85,21 @@ WSGI_APPLICATION = 'urls.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
-DATABASES = {
-    'default': {
+if DEBUG:
+    db = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
+else:
+    db = {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'HOST': '',
+        'NAME': 'urls',
+        'USER': 'urls',
+    }
+
+DATABASES = {
+    'default': db
 }
 
 
@@ -102,3 +121,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+if not DEBUG:
+    STATIC_ROOT = os.environ['STATIC_ROOT']
+
+
+# Media files
+
+MEDIA_URL = '/media/'
+if DEBUG:
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+else:
+    MEDIA_ROOT = os.environ['MEDIA_ROOT']
+
+
+# Authentication settings
+
+LOGIN_REDIRECT_URL = '/'
