@@ -33,7 +33,7 @@ TEMPLATE_DEBUG = DEBUG
 if DEBUG:
     ALLOWED_HOSTS = []
 else:
-    ALLOWED_HOSTS = ['urls.%s' % socket.gethostname()]
+    ALLOWED_HOSTS = ['urls.swarmer.me']
 
 INTERNAL_IPS = ('127.0.0.1',)
 
